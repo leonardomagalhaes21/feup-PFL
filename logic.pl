@@ -1,4 +1,7 @@
 % Utils
+
+:- consult('board.pl').
+
 default(empty).
 
 char(o, 'O').
@@ -19,6 +22,7 @@ board([
     [empty, empty, empty, empty, empty, empty, empty, empty]
 ]).
 
+% Display board content
 display_item(Item):- 
     char(Item, C), 
     write(C).
@@ -60,7 +64,7 @@ main_menu :-
 % Handle user choice
 handle_choice(1) :-
     write('Starting a new game...'), nl,
-    board(Board),
+    generate_random_board(Board),
     display_board(Board),
     %...
     main_menu.
