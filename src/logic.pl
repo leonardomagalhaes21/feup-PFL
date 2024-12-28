@@ -23,6 +23,11 @@ board([
 ]).
 
 
+between(Low, High, Low) :- Low =< High.
+between(Low, High, Value) :-
+    Low < High,
+    NextLow is Low + 1,
+    between(NextLow, High, Value).
 
 sum_list([], 0).
 sum_list([H|T], Sum) :-
@@ -105,3 +110,130 @@ calculate_scores(Board, OScore, XScore, optional_rules) :-
     calculate_group_sizes(Board, x, XSizes),
     product_list(OSizes, OScore),
     product_list(XSizes, XScore).
+
+
+
+
+
+
+not_on_edge([EndRow, EndCol]) :-
+    EndRow > 1, EndRow < 8,
+    EndCol > 1, EndCol < 8.
+
+within_bounds(Row, Col) :-
+    Row >= 1, Row =< 8,
+    Col >= 1, Col =< 8.
+
+cell_belongs_to_player(Board, [Row, Col], Player) :-
+    nth1(Row, Board, BoardRow),
+    nth1(Col, BoardRow, Cell),
+    Cell == Player.
+
+valid_direction([StartRow, StartCol], [StartRow, EndCol]) :-
+    StartCol \= EndCol.
+valid_direction([StartRow, StartCol], [EndRow, StartCol]) :-
+    StartRow \= EndRow.
+
+
+check_horizontal_slide(Board, Row, StartCol, EndCol) :-
+    StartCol < EndCol,
+    check_horizontal_slide_left_to_right(Board, Row, StartCol, EndCol).
+check_horizontal_slide(Board, Row, StartCol, EndCol) :-
+    StartCol >= EndCol,
+    check_horizontal_slide_right_to_left(Board, Row, StartCol, EndCol).
+
+check_horizontal_slide_left_to_right(Board, Row, StartCol, EndCol) :-
+    findall(Cell, (
+        between(StartCol, EndCol, Col),
+        nth1(Row, Board, BoardRow),
+        nth1(Col, BoardRow, Cell),
+        Cell \= empty
+    ), Marbles),
+    length(Marbles, M1),
+
+    findall(Cell, (
+        between(EndCol, 7, Col),
+        nth1(Row, Board, BoardRow),
+        nth1(Col, BoardRow, Cell),
+        Cell == empty
+    ), EmptySpaces),
+    length(EmptySpaces, EmptyCount),
+
+    EmptyCount >= M1.
+
+check_horizontal_slide_right_to_left(Board, Row, StartCol, EndCol) :-
+    findall(Cell, (
+        between(EndCol, StartCol, Col),
+        nth1(Row, Board, BoardRow),
+        nth1(Col, BoardRow, Cell),
+        Cell \= empty
+    ), Marbles),
+    length(Marbles, M1),
+
+    findall(Cell, (
+        between(2, EndCol, Col),
+        nth1(Row, Board, BoardRow),
+        nth1(Col, BoardRow, Cell),
+        Cell == empty
+    ), EmptySpaces),
+    length(EmptySpaces, EmptyCount),
+
+    EmptyCount >= M1.
+
+check_vertical_slide(Board, Col, StartRow, EndRow) :-
+    StartRow < EndRow,
+    check_vertical_slide_top_to_bottom(Board, Col, StartRow, EndRow).
+check_vertical_slide(Board, Col, StartRow, EndRow) :-
+    StartRow >= EndRow,
+    check_vertical_slide_bottom_to_top(Board, Col, StartRow, EndRow).
+
+check_vertical_slide_top_to_bottom(Board, Col, StartRow, EndRow) :-
+    findall(Cell, (
+        between(StartRow, EndRow, Row),
+        nth1(Row, Board, BoardRow),
+        nth1(Col, BoardRow, Cell),
+        Cell \= empty
+    ), Marbles),
+    length(Marbles, M1),
+
+    findall(Cell, (
+        between(EndRow, 7, Row),
+        nth1(Row, Board, BoardRow),
+        nth1(Col, BoardRow, Cell),
+        Cell == empty
+    ), EmptySpaces),
+    length(EmptySpaces, EmptyCount),
+
+    EmptyCount >= M1.
+
+check_vertical_slide_bottom_to_top(Board, Col, StartRow, EndRow) :-
+    findall(Cell, (
+        between(EndRow, StartRow, Row),
+        nth1(Row, Board, BoardRow),
+        nth1(Col, BoardRow, Cell),
+        Cell \= empty
+    ), Marbles),
+    length(Marbles, M1),
+
+    findall(Cell, (
+        between(2, EndRow, Row),
+        nth1(Row, Board, BoardRow),
+        nth1(Col, BoardRow, Cell),
+        Cell == empty
+    ), EmptySpaces),
+    length(EmptySpaces, EmptyCount),
+
+    EmptyCount >= M1.
+
+valid_slide(Board, [StartRow, StartCol], [StartRow, EndCol]) :-
+    check_horizontal_slide(Board, StartRow, StartCol, EndCol).
+valid_slide(Board, [StartRow, StartCol], [EndRow, StartCol]) :-
+    check_vertical_slide(Board, StartCol, StartRow, EndRow).
+
+valid_move(Board, [StartRow, StartCol], [EndRow, EndCol], Player) :-
+    not_on_edge([EndRow, EndCol]),
+    within_bounds(StartRow, StartCol),
+    within_bounds(EndRow, EndCol),
+    cell_belongs_to_player(Board, [StartRow, StartCol], Player),
+    valid_direction([StartRow, StartCol], [EndRow, EndCol]),
+    valid_slide(Board, [StartRow, StartCol], [EndRow, EndCol]).
