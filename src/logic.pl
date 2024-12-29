@@ -11,6 +11,9 @@ char(empty, ' ').
 player(1, player1).
 player(2, player2).
 
+switch_player(o, x).
+switch_player(x, o).
+
 board([
     [empty, empty, empty, empty, empty, empty, empty, empty],
     [empty, empty, empty, empty, empty, empty, empty, empty],
@@ -232,8 +235,75 @@ valid_slide(Board, [StartRow, StartCol], [EndRow, StartCol]) :-
 
 valid_move(Board, [StartRow, StartCol], [EndRow, EndCol], Player) :-
     not_on_edge([EndRow, EndCol]),
+    \+ not_on_edge([StartRow, StartCol]),
     within_bounds(StartRow, StartCol),
     within_bounds(EndRow, EndCol),
     cell_belongs_to_player(Board, [StartRow, StartCol], Player),
     valid_direction([StartRow, StartCol], [EndRow, EndCol]),
     valid_slide(Board, [StartRow, StartCol], [EndRow, EndCol]).
+
+
+
+
+
+generate_moves(Board, Player, Moves) :-
+    findall([StartRow, StartCol, EndRow, EndCol], (
+        between(1, 8, StartRow),
+        between(1, 8, StartCol),
+        between(1, 8, EndRow),
+        between(1, 8, EndCol),
+        valid_move(Board, [StartRow, StartCol], [EndRow, EndCol], Player)
+    ), Moves).
+
+
+execute_move(Board, [StartRow, StartCol, EndRow, EndCol], NewBoard) :-
+    cell_player(Board, StartRow, StartCol, Player),
+    move_marbles(Board, [StartRow, StartCol], [EndRow, EndCol], Player, NewBoard).
+
+move_marbles(Board, [StartRow, StartCol], [EndRow, EndCol], Player, NewBoard) :-
+    % direction of the move (horizontal or vertical)
+    DeltaRow is sign(EndRow - StartRow),
+    DeltaCol is sign(EndCol - StartCol),
+    move_marbles_aux(Board, [StartRow, StartCol], DeltaRow, DeltaCol, [EndRow, EndCol], Player, NewBoard).
+
+move_marbles_aux(Board, [Row, Col], _, _, [Row, Col], _, Board).
+move_marbles_aux(Board, [Row, Col], DeltaRow, DeltaCol, [EndRow, EndCol], Player, NewBoard) :-
+    move_marble_to_next(Board, [Row, Col], DeltaRow, DeltaCol, TempBoard),
+    NextRow is Row + DeltaRow,
+    NextCol is Col + DeltaCol,
+    move_marbles_aux(TempBoard, [NextRow, NextCol], DeltaRow, DeltaCol, [EndRow, EndCol], Player, NewBoard).
+
+move_marble_to_next(Board, [Row, Col], DeltaRow, DeltaCol, NewBoard) :-
+    NextRow is Row + DeltaRow,
+    NextCol is Col + DeltaCol,
+    cell_player(Board, Row, Col, Player),
+    handle_next_position(Board, [Row, Col], [NextRow, NextCol], Player, DeltaRow, DeltaCol, NewBoard).
+
+% next position is empty
+handle_next_position(Board, [Row, Col], [NextRow, NextCol], Player, _, _, NewBoard) :-
+    cell_player(Board, NextRow, NextCol, empty),
+    place_marble(Board, [NextRow, NextCol], Player, TempBoard),
+    clear_cell(TempBoard, [Row, Col], NewBoard).
+
+% next position not empty
+handle_next_position(Board, [Row, Col], [NextRow, NextCol], Player, DeltaRow, DeltaCol, NewBoard) :-
+    cell_player(Board, NextRow, NextCol, NextPlayer),
+    NextPlayer \= empty,
+    move_marble_to_next(Board, [NextRow, NextCol], DeltaRow, DeltaCol, TempBoard),
+    place_marble(TempBoard, [NextRow, NextCol], Player, TempBoard2),
+    clear_cell(TempBoard2, [Row, Col], NewBoard).
+
+place_marble(Board, [Row, Col], Player, NewBoard) :-
+    nth1(Row, Board, OldRow),
+    replace_in_list(Col, OldRow, Player, NewRow),
+    replace_in_list(Row, Board, NewRow, NewBoard).
+
+clear_cell(Board, [Row, Col], NewBoard) :-
+    nth1(Row, Board, OldRow),
+    replace_in_list(Col, OldRow, empty, NewRow),
+    replace_in_list(Row, Board, NewRow, NewBoard).
+
+replace_in_list(Index, List, Element, NewList) :-
+    nth1(Index, List, _, Rest),
+    nth1(Index, NewList, Element, Rest).
+
