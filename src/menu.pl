@@ -1,8 +1,12 @@
 % Main menu predicate
 main_menu :-
-    write('Welcome to Mabula!'), nl,
+    write('======================================='), nl,
+    write('              Mabula Game              '), nl,
+    write('======================================='), nl,
     write('1. Start New Game'), nl,
-    write('2. Exit'), nl,
+    write('2. Instructions'), nl,
+    write('3. Exit'), nl,
+    write('======================================='), nl,
     write('Please enter your choice: '),
     read(Choice),
     handle_choice_menu(Choice).
@@ -12,15 +16,72 @@ handle_choice_menu(1) :-
     write('Starting a new game...'), nl,
     get_game_config(GameConfig),
     initial_state(GameConfig, GameState),
-    display_game(GameState),
-    %...
-    main_menu.
+    play_game(GameState).
+
 handle_choice_menu(2) :-
+    display_instructions.
+
+handle_choice_menu(3) :-
     write('Exiting...'), nl.
 handle_choice_menu(_) :-
     write('Invalid choice, please try again.'), nl,
     main_menu.
     
+
+display_instructions :-
+    nl,
+    write('======================================='), nl,
+    write('              Mabula Rules             '), nl,
+    write('======================================='), nl,
+    write('1. Each player starts with 12 marbles.'), nl,
+    write('2. Players take turns moving marbles.'), nl,
+    write('3. Moves push marbles across the board.'), nl,
+    write('4. The goal is to form the largest group.'), nl,
+    write('5. Alternatively, you can decide to score'), nl,
+    write('   based on the product of group sizes.'), nl,
+    write('======================================='), nl,
+    main_menu.
+
+
+
+play_game(GameState) :-
+    GameState = [Board, _CurrentPlayer, _Player1Type, _Player2Type, Rules, Player1Name, Player2Name],
+    game_over(GameState, Winner),
+    display_game(GameState),
+    handle_game_over(Winner, Board, Player1Name, Player2Name, Rules).
+
+play_game(GameState) :-
+    GameState = [_Board, CurrentPlayer, Player1Type, Player2Type, _Rules, _Player1Name, _Player2Name],
+    \+ game_over(GameState, _),
+    display_game(GameState),
+    handle_game_continue(GameState, CurrentPlayer, Player1Type, Player2Type).
+
+handle_game_over(Winner, Board, Player1Name, Player2Name, Rules) :-
+    calculate_scores(Board, OScore, XScore, Rules),
+    format('Game over! ~w (o) Score: ~w, ~w (x) Score: ~w', [Player1Name, OScore, Player2Name, XScore]), nl,
+    format('Winner: ~w', [Winner]), nl,
+    main_menu.
+
+handle_game_continue(GameState, CurrentPlayer, human, human) :-
+    format('~w, it\'s your turn. Enter your move (e.g., "[3,1,3,5]."):', [CurrentPlayer]), nl,
+    read(Move),
+    handle_move(GameState, Move).
+
+handle_game_continue(_, _, _, _) :-
+    write('This mode is not supported yet.'), nl,
+    main_menu.
+
+handle_move(GameState, Move) :-
+    move(GameState, Move, NewGameState),
+    play_game(NewGameState).
+
+handle_move(GameState, _) :-
+    write('Invalid move, please try again.'), nl,
+    play_game(GameState).
+
+
+
+
 
 
 get_game_config(GameConfig) :-
@@ -87,7 +148,7 @@ display_rows([Row|Rows], N):-
 display_board([]).
 display_board(Board):-
     nl,
-    write('   A B C D E F G H'), nl,
-    write('  +----------------+'), nl,
+    write('   1 2 3 4 5 6 7 8'), nl,
+    write('  +---------------+'), nl,
     display_rows(Board, 1),
-    write('  +----------------+'), nl.
+    write('  +---------------+'), nl.

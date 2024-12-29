@@ -7,7 +7,7 @@ initial_state(GameConfig, GameState) :-
     GameState = [Board, o ,Player1Type, Player2Type, Rules, Player1Name, Player2Name].
 
 display_game(GameState) :-
-    GameState = [Board, CurrentPlayer ,Player1Type, Player2Type, Rules, Player1Name, Player2Name],
+    GameState = [Board, CurrentPlayer ,_Player1Type, _Player2Type, Rules, Player1Name, Player2Name],
     write('Current Player: '), write(CurrentPlayer), nl,
     display_board(Board),
     calculate_scores(Board, OScore, XScore, Rules),
@@ -28,8 +28,16 @@ move(GameState, Move, NewGameState) :-
     valid_move(Board, [StartRow, StartCol], [EndRow, EndCol], CurrentPlayer),
     execute_move(Board, [StartRow, StartCol, EndRow, EndCol], NewBoard),
     switch_player(CurrentPlayer, NextPlayer),
-    NewGameState = [NewBoard, NextPlayer, Player1Type, Player2Type, Rules, Player1Name, Player2Name].
+    valid_moves([NewBoard, NextPlayer, Player1Type, Player2Type, Rules, Player1Name, Player2Name], NextPlayerMoves),
+    valid_moves_check(NewBoard, CurrentPlayer, NextPlayer, Player1Type, Player2Type, Rules, Player1Name, Player2Name, NextPlayerMoves, NewGameState).
 
+game_over(GameState, Winner) :-
+    GameState = [Board, _, _, _, Rules, _, _],
+    calculate_scores(Board, OScore, XScore, Rules),
+    valid_moves([Board, o | _], OMoves),
+    valid_moves([Board, x | _], XMoves),
+    check_winner(OMoves, XMoves, OScore, XScore, Winner).
+    
 play :-
     main_menu.
 
