@@ -89,7 +89,21 @@ get_game_config(GameConfig) :-
     get_rules(Rules),
     get_player_name(1, Player1Name),
     get_player_name(2, Player2Name),
-    GameConfig = [Player1Type, Player2Type, Rules, Player1Name, Player2Name].
+    get_starting_player(StartingPlayer),
+    GameConfig = [StartingPlayer, Player1Type, Player2Type, Rules, Player1Name, Player2Name].
+
+get_starting_player(StartingPlayer) :-
+    write('Select starting player:'), nl,
+    write('1. Player 1 (O)'), nl,
+    write('2. Player 2 (X)'), nl,
+    read(Choice),
+    handle_starting_player_choice(Choice, StartingPlayer).
+
+handle_starting_player_choice(1, o).
+handle_starting_player_choice(2, x).
+handle_starting_player_choice(_, StartingPlayer) :-
+    write('Invalid choice, please try again.'), nl,
+    get_starting_player(StartingPlayer).
 
 get_player_types(Player1Type, Player2Type) :-
     write('Select player types:'), nl,

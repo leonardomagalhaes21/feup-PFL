@@ -2,9 +2,9 @@
 :- consult('menu.pl').
 
 initial_state(GameConfig, GameState) :-
-    GameConfig = [Player1Type, Player2Type, Rules, Player1Name, Player2Name],
+    GameConfig = [StartingPlayer, Player1Type, Player2Type, Rules, Player1Name, Player2Name],
     generate_random_board(Board),
-    GameState = [Board, o ,Player1Type, Player2Type, Rules, Player1Name, Player2Name].
+    GameState = [Board, StartingPlayer ,Player1Type, Player2Type, Rules, Player1Name, Player2Name].
 
 display_game(GameState) :-
     GameState = [Board, CurrentPlayer ,_Player1Type, _Player2Type, Rules, Player1Name, Player2Name],
