@@ -147,7 +147,8 @@ check_horizontal_slide(Board, Row, StartCol, EndCol) :-
 
 check_horizontal_slide_left_to_right(Board, Row, StartCol, EndCol) :-
     findall(Cell, (
-        between(StartCol, EndCol, Col),
+        C is EndCol - 1,
+        between(StartCol, C, Col),
         nth1(Row, Board, BoardRow),
         nth1(Col, BoardRow, Cell),
         Cell \= empty
@@ -166,7 +167,8 @@ check_horizontal_slide_left_to_right(Board, Row, StartCol, EndCol) :-
 
 check_horizontal_slide_right_to_left(Board, Row, StartCol, EndCol) :-
     findall(Cell, (
-        between(EndCol, StartCol, Col),
+        C is EndCol + 1,
+        between(C, StartCol, Col),
         nth1(Row, Board, BoardRow),
         nth1(Col, BoardRow, Cell),
         Cell \= empty
@@ -192,7 +194,8 @@ check_vertical_slide(Board, Col, StartRow, EndRow) :-
 
 check_vertical_slide_top_to_bottom(Board, Col, StartRow, EndRow) :-
     findall(Cell, (
-        between(StartRow, EndRow, Row),
+        R is EndRow - 1,
+        between(StartRow, R, Row),
         nth1(Row, Board, BoardRow),
         nth1(Col, BoardRow, Cell),
         Cell \= empty
@@ -211,7 +214,8 @@ check_vertical_slide_top_to_bottom(Board, Col, StartRow, EndRow) :-
 
 check_vertical_slide_bottom_to_top(Board, Col, StartRow, EndRow) :-
     findall(Cell, (
-        between(EndRow, StartRow, Row),
+        R is EndRow + 1,
+        between(R, StartRow, Row),
         nth1(Row, Board, BoardRow),
         nth1(Col, BoardRow, Cell),
         Cell \= empty
