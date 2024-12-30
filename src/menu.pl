@@ -1,3 +1,6 @@
+:- use_module(library(system)).
+
+
 % Main menu predicate
 main_menu :-
     write('======================================='), nl,
@@ -45,16 +48,16 @@ display_instructions :-
 
 
 play_game(GameState) :-
-    GameState = [Board, _CurrentPlayer, _Player1Type, _Player2Type, Rules, Player1Name, Player2Name],
+    GameState = [Board, _CurrentPlayer, _Player1Type, _Player2Type, Rules, Player1Name, Player2Name, _Difficulty],
     game_over(GameState, Winner),
     display_game(GameState),
     handle_game_over(Winner, Board, Player1Name, Player2Name, Rules).
 
 play_game(GameState) :-
-    GameState = [_Board, CurrentPlayer, Player1Type, Player2Type, _Rules, _Player1Name, _Player2Name],
+    GameState = [_Board, CurrentPlayer, Player1Type, Player2Type, _Rules, _Player1Name, _Player2Name, Difficulty],
     \+ game_over(GameState, _),
     display_game(GameState),
-    handle_game_continue(GameState, CurrentPlayer, Player1Type, Player2Type).
+    handle_game_continue(GameState, CurrentPlayer, Player1Type, Player2Type, Difficulty).
 
 handle_game_over(Winner, Board, Player1Name, Player2Name, Rules) :-
     calculate_scores(Board, OScore, XScore, Rules),
@@ -62,10 +65,35 @@ handle_game_over(Winner, Board, Player1Name, Player2Name, Rules) :-
     format('Winner: ~w', [Winner]), nl,
     main_menu.
 
-handle_game_continue(GameState, CurrentPlayer, human, human) :-
+handle_game_continue(GameState, CurrentPlayer, human, human, _) :-
     format('~w, it\'s your turn. Enter your move (e.g., "[3,1,3,5]."):', [CurrentPlayer]), nl,
     read(Move),
     handle_move(GameState, Move).
+
+handle_game_continue(GameState, o, human, computer, _) :-
+    format('~w, it\'s your turn. Enter your move (e.g., "[3,1,3,5]."):', o), nl,
+    read(Move),
+    handle_move(GameState, Move).
+
+handle_game_continue(GameState, x , human, computer, Difficulty) :-
+    choose_move(GameState, Difficulty, ComputerMove),
+    sleep(1),
+    handle_move(GameState, ComputerMove).
+
+handle_game_continue(GameState, x, computer, human, _) :-
+    format('~w, it\'s your turn. Enter your move (e.g., "[3,1,3,5]."):', x), nl,
+    read(Move),
+    handle_move(GameState, Move).
+
+handle_game_continue(GameState, o , computer, human, Difficulty) :-
+    choose_move(GameState, Difficulty, ComputerMove),
+    sleep(1),
+    handle_move(GameState, ComputerMove).
+
+handle_game_continue(GameState, _CurrentPlayer, computer, computer, Difficulty) :-
+    choose_move(GameState, Difficulty, ComputerMove),
+    sleep(1),
+    handle_move(GameState, ComputerMove).
 
 handle_game_continue(_, _, _, _) :-
     write('This mode is not supported yet.'), nl,
@@ -90,7 +118,8 @@ get_game_config(GameConfig) :-
     get_player_name(1, Player1Name),
     get_player_name(2, Player2Name),
     get_starting_player(StartingPlayer),
-    GameConfig = [StartingPlayer, Player1Type, Player2Type, Rules, Player1Name, Player2Name].
+    get_difficulty(Player1Type, Player2Type, Difficulty),
+    GameConfig = [StartingPlayer, Player1Type, Player2Type, Rules, Player1Name, Player2Name, Difficulty].
 
 get_starting_player(StartingPlayer) :-
     write('Select starting player:'), nl,
@@ -104,6 +133,21 @@ handle_starting_player_choice(2, x).
 handle_starting_player_choice(_, StartingPlayer) :-
     write('Invalid choice, please try again.'), nl,
     get_starting_player(StartingPlayer).
+
+get_difficulty(human, human, 0).
+get_difficulty(_, _, Difficulty) :-
+    write('Select difficulty:'), nl,
+    write('1. Random'), nl,
+    write('2. Greedy'), nl,
+    read(Choice),
+    handle_difficulty_choice(Choice, Difficulty).
+    
+handle_difficulty_choice(1, 1).
+handle_difficulty_choice(2, 2).
+handle_difficulty_choice(_, Difficulty) :-
+    write('Invalid choice, please try again.'), nl,
+    get_difficulty(Difficulty).
+
 
 get_player_types(Player1Type, Player2Type) :-
     write('Select player types:'), nl,

@@ -313,10 +313,18 @@ replace_in_list(Index, List, Element, NewList) :-
 
 
 
-valid_moves_check(NewBoard, CurrentPlayer, _NextPlayer, Player1Type, Player2Type, Rules, Player1Name, Player2Name, [], [NewBoard, CurrentPlayer, Player1Type, Player2Type, Rules, Player1Name, Player2Name]).
-valid_moves_check(NewBoard, _CurrentPlayer, NextPlayer, Player1Type, Player2Type, Rules, Player1Name, Player2Name, NextPlayerMoves, [NewBoard, NextPlayer, Player1Type, Player2Type, Rules, Player1Name, Player2Name]) :-
+valid_moves_check(NewBoard, CurrentPlayer, _NextPlayer, Player1Type, Player2Type, Rules, Player1Name, Player2Name, Difficulty, [], [NewBoard, CurrentPlayer, Player1Type, Player2Type, Rules, Player1Name, Player2Name, Difficulty]).
+valid_moves_check(NewBoard, _CurrentPlayer, NextPlayer, Player1Type, Player2Type, Rules, Player1Name, Player2Name, Difficulty, NextPlayerMoves, [NewBoard, NextPlayer, Player1Type, Player2Type, Rules, Player1Name, Player2Name, Difficulty]) :-
     NextPlayerMoves \= [].
 
 check_winner([], [], OScore, XScore, 'o') :- OScore > XScore.
 check_winner([], [], OScore, XScore, 'x') :- XScore > OScore.
 check_winner([], [], OScore, XScore, 'draw') :- OScore =:= XScore.
+
+
+
+simulate_move(GameState, Move, Value) :-
+    move(GameState, Move, NewGameState),
+    NewGameState = [_, CurrentPlayer, _, _, _, _, _, _],
+    switch_player(CurrentPlayer, Player),
+    value(NewGameState, Player, Value).
