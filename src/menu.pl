@@ -82,13 +82,13 @@ handle_game_over(Winner, Board, Player1Name, Player2Name, Rules) :-
     main_menu.
 
 handle_game_continue(GameState, CurrentPlayer, human, human, _) :-
-    format('~w, it\'s your turn. Enter your move (e.g., "[3,1,3,5]."):', [CurrentPlayer]), nl,
+    format('~w, it\'s your turn. Enter your move ("[Xi,Yi,Xf,Yf]."):', [CurrentPlayer]), nl,
     read(UserMove),
     convert_user_move(UserMove, Move),
     handle_move(GameState, Move).
 
 handle_game_continue(GameState, o, human, computer, _) :-
-    format('~w, it\'s your turn. Enter your move (e.g., "[3,1,3,5]."):', o), nl,
+    format('~w, it\'s your turn. Enter your move ("[Xi,Yi,Xf,Yf]."):', o), nl,
     read(UserMove),
     convert_user_move(UserMove, Move),
     handle_move(GameState, Move).
@@ -99,7 +99,7 @@ handle_game_continue(GameState, x , human, computer, Difficulty) :-
     handle_move(GameState, ComputerMove).
 
 handle_game_continue(GameState, x, computer, human, _) :-
-    format('~w, it\'s your turn. Enter your move (e.g., "[3,1,3,5]."):', x), nl,
+    format('~w, it\'s your turn. Enter your move ("[Xi,Yi,Xf,Yf]."):', x), nl,
     read(UserMove),
     convert_user_move(UserMove, Move),
     handle_move(GameState, Move).
