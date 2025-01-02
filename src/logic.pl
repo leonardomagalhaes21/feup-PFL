@@ -130,7 +130,7 @@ within_bounds(Row, Col) :-
 cell_belongs_to_player(Board, [Row, Col], Player) :-
     nth1(Row, Board, BoardRow),
     nth1(Col, BoardRow, Cell),
-    Cell == Player.
+    Cell = Player.
 
 valid_direction([StartRow, StartCol], [StartRow, EndCol]) :-
     StartCol \= EndCol.
@@ -159,7 +159,7 @@ check_horizontal_slide_left_to_right(Board, Row, StartCol, EndCol) :-
         between(EndCol, 7, Col),
         nth1(Row, Board, BoardRow),
         nth1(Col, BoardRow, Cell),
-        Cell == empty
+        Cell = empty
     ), EmptySpaces),
     length(EmptySpaces, EmptyCount),
 
@@ -179,7 +179,7 @@ check_horizontal_slide_right_to_left(Board, Row, StartCol, EndCol) :-
         between(2, EndCol, Col),
         nth1(Row, Board, BoardRow),
         nth1(Col, BoardRow, Cell),
-        Cell == empty
+        Cell = empty
     ), EmptySpaces),
     length(EmptySpaces, EmptyCount),
 
@@ -206,7 +206,7 @@ check_vertical_slide_top_to_bottom(Board, Col, StartRow, EndRow) :-
         between(EndRow, 7, Row),
         nth1(Row, Board, BoardRow),
         nth1(Col, BoardRow, Cell),
-        Cell == empty
+        Cell = empty
     ), EmptySpaces),
     length(EmptySpaces, EmptyCount),
 
@@ -226,7 +226,7 @@ check_vertical_slide_bottom_to_top(Board, Col, StartRow, EndRow) :-
         between(2, EndRow, Row),
         nth1(Row, Board, BoardRow),
         nth1(Col, BoardRow, Cell),
-        Cell == empty
+        Cell = empty
     ), EmptySpaces),
     length(EmptySpaces, EmptyCount),
 
