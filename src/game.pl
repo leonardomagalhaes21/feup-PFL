@@ -8,14 +8,15 @@ initial_state(GameConfig, GameState) :-
 
 display_game(GameState) :-
     GameState = [Board, CurrentPlayer ,_Player1Type, _Player2Type, Rules, Player1Name, Player2Name, _Difficulty],
-    write('Current Player: '), write(CurrentPlayer), nl,
+    nl,
     display_board(Board),
     calculate_scores(Board, OScore, XScore, Rules),
     write('Current Player: '), write(CurrentPlayer), nl,
     format('~w (o) Score: ~w', [Player1Name, OScore]), nl,
     format('~w (x) Score: ~w', [Player2Name, XScore]), nl,
     valid_moves(GameState, ListOfMoves),
-    write('Valid Moves: '), write(ListOfMoves), nl.
+    convert_real_moves(ListOfMoves, UserMoves),
+    write('Valid Moves: '), write(UserMoves), nl.
 
 valid_moves(GameState, ListOfMoves) :-
     GameState = [Board, CurrentPlayer | _],
@@ -60,7 +61,8 @@ choose_move(GameState, 2, Move) :-
     valid_moves(GameState, Moves),
     findall(Value-M, (member(M, Moves), simulate_move(GameState, M, Value)), MoveValues),
     max_member(BestValue-Move, MoveValues),
-    format('Best move: ~w, Value: ~w', [Move, BestValue]), nl.
+    convert_real_move(Move, M),
+    format('Best move: ~w, Value: ~w', [M, BestValue]), nl.
 
     
 play :-

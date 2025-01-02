@@ -31,6 +31,22 @@ handle_choice_menu(_) :-
     main_menu.
     
 
+
+convert_user_move([StartCol, UserStartRow, EndCol, UserEndRow], [RealStartRow, StartCol, RealEndRow, EndCol]) :-
+    RealStartRow is 9 - UserStartRow,
+    RealEndRow is 9 - UserEndRow.
+
+
+convert_real_move([StartRow, StartCol, EndRow, EndCol], [StartCol, UserStartRow, EndCol, UserEndRow]) :-
+    UserStartRow is 9 - StartRow,
+    UserEndRow is 9 - EndRow.
+
+convert_real_moves([], []).
+convert_real_moves([Move|Moves], [UserMove|UserMoves]) :-
+    convert_real_move(Move, UserMove),
+    convert_real_moves(Moves, UserMoves).
+
+
 display_instructions :-
     nl,
     write('======================================='), nl,
@@ -67,12 +83,14 @@ handle_game_over(Winner, Board, Player1Name, Player2Name, Rules) :-
 
 handle_game_continue(GameState, CurrentPlayer, human, human, _) :-
     format('~w, it\'s your turn. Enter your move (e.g., "[3,1,3,5]."):', [CurrentPlayer]), nl,
-    read(Move),
+    read(UserMove),
+    convert_user_move(UserMove, Move),
     handle_move(GameState, Move).
 
 handle_game_continue(GameState, o, human, computer, _) :-
     format('~w, it\'s your turn. Enter your move (e.g., "[3,1,3,5]."):', o), nl,
-    read(Move),
+    read(UserMove),
+    convert_user_move(UserMove, Move),
     handle_move(GameState, Move).
 
 handle_game_continue(GameState, x , human, computer, Difficulty) :-
@@ -82,7 +100,8 @@ handle_game_continue(GameState, x , human, computer, Difficulty) :-
 
 handle_game_continue(GameState, x, computer, human, _) :-
     format('~w, it\'s your turn. Enter your move (e.g., "[3,1,3,5]."):', x), nl,
-    read(Move),
+    read(UserMove),
+    convert_user_move(UserMove, Move),
     handle_move(GameState, Move).
 
 handle_game_continue(GameState, o , computer, human, Difficulty) :-
@@ -146,7 +165,7 @@ handle_difficulty_choice(1, 1).
 handle_difficulty_choice(2, 2).
 handle_difficulty_choice(_, Difficulty) :-
     write('Invalid choice, please try again.'), nl,
-    get_difficulty(Difficulty).
+    get_difficulty(_, _, Difficulty).
 
 
 get_player_types(Player1Type, Player2Type) :-
@@ -194,19 +213,21 @@ display_row([Item|Items]):-
     display_item(Item),
     display_row(Items).
 
-display_rows([], _).
-display_rows([Row|Rows], N):- 
-    write(N), 
+display_rows([], _, _).
+display_rows([Row|Rows], TotalRows, N):- 
+    DisplayRowNum is TotalRows - N + 1,
+    write(DisplayRowNum), 
     write(' '), 
     display_row(Row), 
     write('|'), nl, 
     N1 is N + 1, 
-    display_rows(Rows, N1).
+    display_rows(Rows, TotalRows, N1).
 
 display_board([]).
 display_board(Board):-
-    nl,
-    write('   1 2 3 4 5 6 7 8'), nl,
     write('  +---------------+'), nl,
-    display_rows(Board, 1),
-    write('  +---------------+'), nl.
+    length(Board, TotalRows),
+    display_rows(Board, TotalRows, 1),
+    write('  +---------------+'), nl,
+    write('   1 2 3 4 5 6 7 8'), nl,
+    nl.
